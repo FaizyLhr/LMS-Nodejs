@@ -1,4 +1,5 @@
 const UserModel = require("../../models/User");
+var emailService = require("../../utilities/emailService");
 
 const addUser = async function (req, res) {
 	try {
@@ -8,7 +9,7 @@ const addUser = async function (req, res) {
 
 		// Validate User input
 		if (typeof username === "undefined" || username === null) {
-			res.status(203).send({ message: "Please send name of User" });
+			res.status(203).send({ message: "Please send username of User" });
 			return;
 		}
 		if (typeof email === "undefined" || email === null) {
@@ -30,13 +31,20 @@ const addUser = async function (req, res) {
 		user.email = email;
 		user.password = password;
 		user.userType = userType;
+		user.setOTP();
 
 		// console.log(user);
 		user.save((err, result) => {
-			if (!err) {
-				res.status(201).send(result);
+			if (err) {
+				res.status(400).send(err);
 			} else {
-				res.status(203).send(err);
+				// console.log(result);
+				// console.log(user);
+				emailService.sendEmailVerificationOTP(result);
+				res.status(201).send({
+					message:
+						"SignUp successfully an OTP sent to your email please verify your email address",
+				});
 			}
 		});
 	} catch (e) {

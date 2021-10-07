@@ -6,7 +6,8 @@ const OrderModel = require("../../models/Orders");
 const UserModel = require("../../models/User");
 const BookModel = require("../../models/Books");
 
-const { isAdmin, isUser, isLogin } = require("../../auth/auth");
+const { isAdmin, isUser, isToken } = require("../auth");
+
 const calculateFine = require("../middleware/calculateFine");
 
 router.param("userSlug", (req, res, next, slug) => {
@@ -17,7 +18,7 @@ router.param("userSlug", (req, res, next, slug) => {
 			}
 
 			req.user = user;
-			console.log(req.user);
+			// console.log(req.user);
 
 			return next();
 		})
@@ -94,13 +95,23 @@ router.get("/:userSlug/order/:orderSlug", isUser, (req, res) => {
 	// .catch((err) => res.status(500).send(err));
 });
 
-// // View Details of Order
-// router.get(
-// 	"/:userSlug/viewOrderDetails/:orderSlug",
-// 	isUser,
-// 	calculateFine,
-// 	(req, res) => {}
-// );
+// View Details of Order
+router.get(
+	"/:userSlug/viewOrderDetails/:orderSlug",
+	isUser,
+	calculateFine,
+	(req, res) => {
+		// console.log(req.order);
+		res.json({
+			issuedDate: req.order.issuedDate,
+			expiryDate: req.order.expiryDate,
+			fine: req.order.fine,
+		});
+		// res.send(`Issued date is ${req.order.issuedDate}
+		// Expiry Date is ${req.order.expiryDate}
+		// 		Total Fine is ${req.order.fine}`);
+	}
+);
 
 {
 	// //View orders By UserName

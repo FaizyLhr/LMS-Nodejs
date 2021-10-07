@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 // const uniqueValidator = require("mongoose-unique-validator");
 const slug = require("slug");
+var otpGenerator = require("otp-generator");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -28,8 +29,11 @@ const UserSchema = new mongoose.Schema({
 		default: 2,
 		enum: [1, 2], //1-admin 2-Student
 	},
+	otp: String,
+	otpExpires: Date,
+	passwordRestToken: String,
+	isEmailVerified: { type: Boolean, default: false },
 	password: { type: String, minLength: 4, trim: true },
-	token: { type: String },
 });
 
 UserSchema.pre("save", function (next) {
@@ -71,14 +75,16 @@ UserSchema.pre("save", function (next) {
 });
 
 UserSchema.methods.comparePass = function (pass) {
-	bcrypt
-		.compare(pass, this.password)
-		.then((val) => {
-			return val;
-		})
-		.catch((err) => {
-			return err;
-		});
+	let ans = bcrypt.compareSync(pass, this.password);
+	if (ans) {
+		// console.log("ans");
+		// console.log(ans);
+		return true;
+	} else {
+		// console.log("ans");
+		// console.log(ans);
+		return false;
+	}
 };
 
 UserSchema.pre("validate", function (next) {
@@ -94,7 +100,19 @@ UserSchema.methods.slugify = function () {
 	this.slug = slug(((Math.random() * Math.pow(36, 6)) | 0).toString(36));
 };
 
-UserSchema.methods.getToken = function () {
+UserSchema.methods.generatePasswordRestToken = function () {
+	this.passwordRestToken = crypto.randomBytes(48).toString("hex");
+};
+
+UserSchema.methods.setOTP = function () {
+	this.otp = otpGenerator.generate(6, {
+		upperCase: false,
+		specialChars: false,
+	});
+	this.otpExpires = Date.now() + 3600000; // 1 hour
+};
+
+UserSchema.methods.generateToken = function () {
 	jwt.sign(
 		{ user: this.email },
 		secretKey,
@@ -105,6 +123,19 @@ UserSchema.methods.getToken = function () {
 			this.token = result;
 		}
 	);
+};
+
+UserSchema.methods.toAuthJSON = function () {
+	this.generateToken();
+	return {
+		token: this.token,
+		username: this.username,
+		slug: this.slug,
+		email: this.email,
+		userType: this.userType,
+		isEmailVerified: this.isEmailVerified,
+		password: this.password,
+	};
 };
 
 // UserSchema.plugin(uniqueValidator);

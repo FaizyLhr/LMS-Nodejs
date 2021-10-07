@@ -5,7 +5,7 @@ const addBook = require("../middleware/addBook");
 const BookModel = require("../../models/Books");
 const UserModel = require("../../models/User");
 
-const { isAdmin, isUser, isLogin } = require("../../auth/auth");
+const { isAdmin, isUser, isToken } = require("../auth");
 
 router.param("userSlug", (req, res, next, slug) => {
 	UserModel.findOne({ slug })
