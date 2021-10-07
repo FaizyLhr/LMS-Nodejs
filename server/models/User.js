@@ -5,6 +5,7 @@ var otpGenerator = require("otp-generator");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+var crypto = require("crypto");
 
 const secretKey = "Faizy";
 
@@ -87,6 +88,24 @@ UserSchema.methods.comparePass = function (pass) {
 	}
 };
 
+UserSchema.methods.setPassword = function (pass) {
+	bcrypt.genSalt(10, (err, salt) => {
+		if (err) return next(err);
+
+		// Hash Generation
+
+		bcrypt
+			.hash(pass, salt)
+			.then((complex) => {
+				this.password = complex;
+				next();
+			})
+			.catch((e) => {
+				return err;
+			});
+	});
+};
+
 UserSchema.pre("validate", function (next) {
 	// console.log(this);
 	if (!this.slug) {
@@ -113,28 +132,18 @@ UserSchema.methods.setOTP = function () {
 };
 
 UserSchema.methods.generateToken = function () {
-	jwt.sign(
-		{ user: this.email },
-		secretKey,
-		{ expiresIn: "1h" },
-		(err, result) => {
-			if (err) return err;
-
-			this.token = result;
-		}
-	);
+	return jwt.sign({ email: this.email }, secretKey, { expiresIn: "1h" });
 };
 
 UserSchema.methods.toAuthJSON = function () {
-	this.generateToken();
 	return {
-		token: this.token,
 		username: this.username,
 		slug: this.slug,
 		email: this.email,
 		userType: this.userType,
 		isEmailVerified: this.isEmailVerified,
 		password: this.password,
+		token: this.generateToken(),
 	};
 };
 

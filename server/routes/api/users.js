@@ -76,14 +76,22 @@ router.get("/otp/resend/:email", (req, res, next) => {
 	});
 });
 
-router.post("/reset/password/:email", (req, res, next) => {
+router.post("/reset/password/:email", (req, res) => {
+	// console.log(req.body);
+	// console.log(req.emailUser.passwordRestToken);
 	if (req.body.passwordRestToken !== req.emailUser.passwordRestToken) {
-		return next(res.status(401).send(`Invalid Password Reset Token`));
+		return res.status(401).send(`Invalid Password Reset Token`);
 	}
 
 	req.emailUser.setPassword(req.body.password);
 
+	console.log(req.emailUser);
+
 	req.emailUser.save((err, user) => {
+		if (err) {
+			return err;
+		}
+		console.log(user);
 		res.send(user.toAuthJSON());
 	});
 });
@@ -124,8 +132,9 @@ router.param("userSlug", (req, res, next, slug) => {
 });
 
 // View Specific User
-router.get("/:userSlug/viewUser", isUser, (req, res) => {
-	UserModel.findOne({ slug: req.params.userSlug })
+router.get("/viewUser", isToken, isUser, (req, res) => {
+	console.log(req.user.slug);
+	UserModel.findOne({ slug: req.user.slug })
 		.then((user) => {
 			res.status(200).send(user);
 		})
@@ -133,7 +142,7 @@ router.get("/:userSlug/viewUser", isUser, (req, res) => {
 });
 
 //update User
-router.put("/:userSlug/updateUser", isUser, async (req, res) => {
+router.put("/updateUser", isToken, isUser, async (req, res) => {
 	// console.log(req.params.userSlug);
 	UserModel.findOne({ slug: req.params.userSlug })
 		.then((updateUser) => {
@@ -169,7 +178,7 @@ router.put("/:userSlug/updateUser", isUser, async (req, res) => {
 });
 
 // delete User
-router.delete("/:userSlug/delUser", isUser, async (req, res) => {
+router.delete("/delUser", isToken, isUser, async (req, res) => {
 	UserModel.findOne({ slug: req.params.userSlug })
 		.then((delUser) => {
 			if (!delUser) {
@@ -193,7 +202,7 @@ router.delete("/:userSlug/delUser", isUser, async (req, res) => {
 });
 
 //View All Users By Admin
-router.get("/:userSlug/users", isAdmin, (req, res) => {
+router.get("/users", isToken, isAdmin, (req, res) => {
 	UserModel.find({})
 		.limit(20)
 		.then((users) => {
@@ -203,7 +212,7 @@ router.get("/:userSlug/users", isAdmin, (req, res) => {
 });
 
 // View Specific User By Admin
-router.get("/:userSlug/viewUser/:user", isAdmin, (req, res) => {
+router.get("/viewUser/:user", isToken, isAdmin, (req, res) => {
 	UserModel.findOne({ slug: req.params.user })
 		.then((user) => {
 			res.status(200).send(user);
@@ -212,11 +221,11 @@ router.get("/:userSlug/viewUser/:user", isAdmin, (req, res) => {
 });
 
 //add User By Admin
-router.post("/:userSlug/addUser", isAdmin, addUser);
+router.post("/addUser", isToken, isAdmin, addUser);
 // router.post("/addUser", addUser);
 
 //update User By Admin
-router.put("/:userSlug/updateUser/:user", isAdmin, async (req, res) => {
+router.put("/updateUser/:user", isToken, isAdmin, async (req, res) => {
 	// console.log(req.params.userSlug);
 	UserModel.findOne({ slug: req.params.user })
 		.then((updateUser) => {
@@ -252,7 +261,7 @@ router.put("/:userSlug/updateUser/:user", isAdmin, async (req, res) => {
 });
 
 // delete User By Admin
-router.delete("/:userSlug/delUser/:user", isAdmin, async (req, res) => {
+router.delete("/delUser/:user", isToken, isAdmin, async (req, res) => {
 	UserModel.findOne({ slug: req.params.user })
 		.then((delUser) => {
 			if (!delUser) {

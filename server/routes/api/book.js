@@ -7,23 +7,8 @@ const UserModel = require("../../models/User");
 
 const { isAdmin, isUser, isToken } = require("../auth");
 
-router.param("userSlug", (req, res, next, slug) => {
-	UserModel.findOne({ slug })
-		.then((user) => {
-			if (!user) {
-				return res.sendStatus(204);
-			}
-
-			req.user = user;
-			// console.log(req.user);
-
-			return next();
-		})
-		.catch(next);
-});
-
 // View Specific book
-router.get("/:userSlug/book/:bookSlug", isUser, (req, res) => {
+router.get("/book/:bookSlug", isToken, isUser, (req, res) => {
 	BookModel.findOne({ slug: req.params.bookSlug })
 		.populate("author")
 		.exec((err, book) => {
@@ -37,7 +22,7 @@ router.get("/:userSlug/book/:bookSlug", isUser, (req, res) => {
 });
 
 // Search Books By Title
-router.get("/:userSlug/searchBook/:title", isUser, (req, res) => {
+router.get("/searchBook/:title", isToken, isUser, (req, res) => {
 	console.log(req.params.title);
 	BookModel.findOne({ title: req.params.title })
 		.populate("author")
@@ -52,7 +37,7 @@ router.get("/:userSlug/searchBook/:title", isUser, (req, res) => {
 });
 
 //View books By Admin
-router.get("/:userSlug/books", isAdmin, (req, res) => {
+router.get("/books", isToken, isAdmin, (req, res) => {
 	BookModel.find({})
 		.limit(20)
 		.populate("author")
@@ -67,7 +52,7 @@ router.get("/:userSlug/books", isAdmin, (req, res) => {
 });
 
 // View Specific book By Admin
-router.get("/:userSlug/viewBook/:bookSlug", isAdmin, (req, res) => {
+router.get("/viewBook/:bookSlug", isToken, isAdmin, (req, res) => {
 	BookModel.findOne({ slug: req.params.bookSlug })
 		.populate("author")
 		.exec((err, book) => {
@@ -81,10 +66,10 @@ router.get("/:userSlug/viewBook/:bookSlug", isAdmin, (req, res) => {
 });
 
 //add Book By Admin
-router.post("/:userSlug/addBook", isAdmin, addBook);
+router.post("/addBook", isToken, isAdmin, addBook);
 
 //update Book By Admin
-router.put("/:userSlug/updateBook/:book", isAdmin, async (req, res) => {
+router.put("/updateBook/:book", isToken, isAdmin, async (req, res) => {
 	// console.log(req.user);
 	BookModel.findOne({ slug: req.params.book })
 		.then((updateBook) => {
@@ -118,7 +103,7 @@ router.put("/:userSlug/updateBook/:book", isAdmin, async (req, res) => {
 });
 
 // delete Book By Admin
-router.delete("/:userSlug/delBook/:book", isAdmin, async (req, res) => {
+router.delete("/delBook/:book", isToken, isAdmin, async (req, res) => {
 	BookModel.findOne({ slug: req.params.book })
 		.then((delBook) => {
 			if (!delBook) {
@@ -142,7 +127,7 @@ router.delete("/:userSlug/delBook/:book", isAdmin, async (req, res) => {
 });
 
 // Search Books By Title By Admin
-router.get("/:userSlug/search/:title", isAdmin, (req, res) => {
+router.get("/search/:title", isToken, isAdmin, (req, res) => {
 	console.log(req.params.title);
 	BookModel.findOne({ title: req.params.title })
 		.populate("author")

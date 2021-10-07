@@ -1,6 +1,7 @@
-// const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
+const UserModel = require("../models/User");
 
-const TOKEN_KEY = "faizy";
+const TOKEN_KEY = "Faizy";
 
 function isAdmin(req, res, next) {
 	// console.log("admin");
@@ -31,22 +32,31 @@ function isUser(req, res, next) {
 }
 
 const isToken = function (req, res, next) {
+	// console.log(req.headers.authorization);
 	if (
 		typeof req.headers.authorization === "undefined" ||
 		req.headers.authorization === null
 	) {
-		res.status(401).send("You are not logged in");
+		return res.status(401).send("You are not logged in");
 	}
 	var token = req.headers.authorization.split(" ");
+	// console.log(token[1]);
 	if (typeof token[1] === "undefined" || typeof token[1] === null) {
 		res.status(400).send("You are not logged in");
 	} else {
-		jsonwebtoken.verify(token[1], TOKEN_KEY, (err, data) => {
+		jwt.verify(token[1], TOKEN_KEY, (err, data) => {
+			console.log(data.email);
 			if (err) {
 				res.status(401).send(err);
 			} else {
-				req.user = data.user;
-				next();
+				UserModel.findOne({ email: data.email })
+					.then((user) => {
+						// console.log(user);
+						req.user = user;
+						// console.log(req.user);
+						next();
+					})
+					.catch((err) => next(err));
 			}
 		});
 	}

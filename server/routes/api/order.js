@@ -10,21 +10,6 @@ const { isAdmin, isUser, isToken } = require("../auth");
 
 const calculateFine = require("../middleware/calculateFine");
 
-router.param("userSlug", (req, res, next, slug) => {
-	UserModel.findOne({ slug })
-		.then((user) => {
-			if (!user) {
-				return res.sendStatus(204);
-			}
-
-			req.user = user;
-			// console.log(req.user);
-
-			return next();
-		})
-		.catch(next);
-});
-
 router.param("bookSlug", (req, res, next, slug) => {
 	BookModel.findOne({ slug })
 		.then((book) => {
@@ -66,7 +51,7 @@ router.param("orderSlug", (req, res, next, slug) => {
 }
 
 // View Specific order
-router.get("/:userSlug/order/:orderSlug", isUser, (req, res) => {
+router.get("/order/:orderSlug", isToken, isUser, (req, res) => {
 	if (
 		typeof req.params.orderSlug === "undefined" ||
 		req.params.orderSlug === null
@@ -97,7 +82,8 @@ router.get("/:userSlug/order/:orderSlug", isUser, (req, res) => {
 
 // View Details of Order
 router.get(
-	"/:userSlug/viewOrderDetails/:orderSlug",
+	"/viewOrderDetails/:orderSlug",
+	isToken,
 	isUser,
 	calculateFine,
 	(req, res) => {
@@ -156,7 +142,7 @@ router.get(
 	// });
 }
 //add Order
-router.post("/:userSlug/addOrder/:bookSlug", addOrder);
+router.post("/addOrder/:bookSlug", isToken, addOrder);
 
 {
 	// //update Order
@@ -218,7 +204,7 @@ router.post("/:userSlug/addOrder/:bookSlug", addOrder);
 }
 
 //View orders By Admin
-router.get("/:userSlug/viewOrders", isAdmin, (req, res) => {
+router.get("/viewOrders", isToken, isAdmin, (req, res) => {
 	OrderModel.find()
 		.limit(20)
 		.then((orders) => {
