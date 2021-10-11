@@ -5,7 +5,7 @@ const Author = require("../server/models/Authors");
 async function seedBook() {
 	const getAuthor = await Author.find();
 
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 100; i++) {
 		let newBook = new Book();
 		newBook.genre = faker.music.genre();
 		newBook.title = faker.name.title();

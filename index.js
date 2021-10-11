@@ -5,10 +5,14 @@ const bodyParser = require("body-parser");
 const port = process.env.PORT || 3000;
 
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 
 // parse application/json
-app.use(bodyParser.json());
+app.use(express.json());
+
+// app.use(logger("dev"));
+// app.use(cookieParser());
+// app.use(express.static(path.join(__dirname, "public")));
 
 require("./server/config/mongodb");
 
@@ -21,3 +25,5 @@ app.get("/", function (req, res, next) {
 app.listen(port, () => {
 	console.log(`App is listening on port: ${port}`);
 });
+
+module.exports = app;

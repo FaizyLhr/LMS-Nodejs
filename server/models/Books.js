@@ -6,7 +6,6 @@ const BookSchema = new mongoose.Schema(
 		genre: {
 			type: String,
 			lowercase: true,
-			unique: true,
 			required: [true, "can't be blank"],
 		},
 		slug: { type: String, unique: true, required: true, trim: true },

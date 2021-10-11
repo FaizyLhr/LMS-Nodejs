@@ -2,7 +2,7 @@ const faker = require("faker");
 const User = require("../server/models/User");
 
 async function seedUser() {
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 100; i++) {
 		let newUser = new User();
 		newUser.username = faker.internet.userName();
 		newUser.email = faker.internet.email();

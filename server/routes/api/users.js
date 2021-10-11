@@ -85,7 +85,7 @@ router.post("/reset/password/:email", (req, res) => {
 
 	req.emailUser.setPassword(req.body.password);
 
-	console.log(req.emailUser);
+	// console.log(req.emailUser);
 
 	req.emailUser.save((err, user) => {
 		if (err) {

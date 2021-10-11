@@ -7,7 +7,7 @@ async function seedOrder() {
 	const getBook = await Book.find();
 	const getUser = await User.find();
 
-	for (let i = 0; i < 1000; i++) {
+	for (let i = 0; i < 100; i++) {
 		let newOrder = new Order();
 		newOrder.shippingAddress = {
 			city: faker.address.city(),
