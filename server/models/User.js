@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
 		unique: true,
 		required: [true, "can't be blank"],
 	},
-	userType: {
+	type: {
 		type: Number,
 		required: true,
 		default: 2,
@@ -125,6 +125,7 @@ UserSchema.methods.generatePasswordRestToken = function () {
 
 UserSchema.methods.setOTP = function () {
 	this.otp = otpGenerator.generate(6, {
+		alphabets: false,
 		upperCase: false,
 		specialChars: false,
 	});
@@ -137,13 +138,27 @@ UserSchema.methods.generateToken = function () {
 
 UserSchema.methods.toAuthJSON = function () {
 	return {
-		username: this.username,
-		slug: this.slug,
-		email: this.email,
-		userType: this.userType,
-		isEmailVerified: this.isEmailVerified,
-		password: this.password,
-		token: this.generateToken(),
+		user: {
+			username: this.username,
+			slug: this.slug,
+			email: this.email,
+			userType: this.userType,
+			isEmailVerified: this.isEmailVerified,
+			password: this.password,
+			token: this.generateToken(),
+		},
+	};
+};
+
+UserSchema.methods.toJSON = function () {
+	return {
+		user: {
+			username: this.username,
+			slug: this.slug,
+			email: this.email,
+			isEmailVerified: this.isEmailVerified,
+			token: this.generateToken(),
+		},
 	};
 };
 
